@@ -6,7 +6,10 @@ import NotFound from '../pages/not-found';
 import Nav from './nav';
 
 class App {
-  container: HTMLElement | null;
+  elements: {
+    root: HTMLElement | null;
+    currentPage: HTMLElement;
+  };
 
   nav: Nav;
 
@@ -15,44 +18,48 @@ class App {
   winnersPage: Winners;
 
   constructor() {
-    this.container = document.getElementById('root');
+    const root = document.getElementById('root');
+    const currentPage = document.createElement('div');
+
+    this.elements = { root, currentPage };
     this.nav = new Nav();
     this.garagePage = new Garage(PageIds.Garage);
     this.winnersPage = new Winners(PageIds.Winners);
   }
 
-  renderPage(pageId: string): void {
-    const currentPage = this.container?.querySelector('[data-page]');
-    if (!currentPage) return;
-    if (currentPage.id === pageId) return;
+  renderPage(): void {
+    const hash = window.location.hash.slice(1);
 
-    let page: Page;
+    if (this.elements.currentPage.dataset.page === hash) return;
 
-    switch (pageId) {
+    let targetPage: Page;
+
+    switch (hash) {
+      case '':
       case PageIds.Garage:
-        page = this.garagePage;
+        targetPage = this.garagePage;
         break;
       case PageIds.Winners:
-        page = this.winnersPage;
+        targetPage = this.winnersPage;
         break;
       default:
-        page = new NotFound();
-        break;
+        targetPage = new NotFound();
     }
 
-    currentPage.replaceWith(page.render());
+    targetPage.render(this.elements.currentPage);
   }
 
   init(): void {
-    if (!this.container) {
+    if (!this.elements.root) {
       return;
     }
-    this.container.append(this.nav.create());
-    this.container.append(this.garagePage.render());
+    this.elements.root.append(this.nav.create());
+    this.elements.root.append(this.elements.currentPage);
 
-    window.addEventListener('hashchange', () => {
-      const hash = window.location.hash.slice(1);
-      this.renderPage(hash);
+    this.renderPage();
+
+    window.addEventListener('hashchange', async () => {
+      this.renderPage();
     });
   }
 }

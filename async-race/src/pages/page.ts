@@ -1,24 +1,25 @@
 abstract class Page {
-  protected container: HTMLElement;
+  protected pageId: string;
 
-  protected heading: HTMLElement;
+  protected title: string;
 
   constructor(pageId: string, title: string) {
-    this.container = document.createElement('div');
-    this.container.id = 'page';
-    this.container.setAttribute('data-page', pageId);
-    this.heading = Page.createHeading(title);
+    this.pageId = pageId;
+    this.title = title;
   }
 
-  static createHeading(text: string): HTMLElement {
+  getPageHeader(): HTMLElement {
     const headingEl = document.createElement('h1');
-    headingEl.textContent = text;
+    headingEl.textContent = this.title;
     return headingEl;
   }
 
-  render(): HTMLElement {
-    this.container.append(this.heading);
-    return this.container;
+  protected setPageAttribute(container: HTMLElement): void {
+    container.setAttribute('data-page', this.pageId);
+  }
+
+  render(container: HTMLElement): void | Promise<void> {
+    container.replaceChildren(this.getPageHeader());
   }
 }
 
