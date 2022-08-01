@@ -2,6 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const SVGSpritemapPlugin = require('svg-spritemap-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -54,6 +55,7 @@ const config = {
     }),
     new MiniCssExtractPlugin(),
     new CleanWebpackPlugin(),
+    new SVGSpritemapPlugin(path.join(__dirname, './src/assets/svg/*.svg'))
   ],
   devServer: {
     hot: true,

@@ -1,6 +1,9 @@
 import { getCars } from '../api/garage';
+import CarView from '../components/car-view';
 import Car from '../types/car';
 import Page from './page';
+
+const CARS_PER_PAGE = 7;
 
 class GaragePage extends Page {
   cars: Car[];
@@ -14,10 +17,13 @@ class GaragePage extends Page {
   }
 
   async render(container: HTMLElement): Promise<void> {
-    this.cars = await getCars();
+    this.cars = await getCars({ limit: CARS_PER_PAGE, page: 1 });
 
     this.setPageAttribute(container);
-    container.replaceChildren(this.getPageHeader());
+
+    const carViews = this.cars.map((car) => new CarView(car).create());
+
+    container.replaceChildren(this.getPageHeader(), ...carViews);
   }
 
   getPageHeader(): HTMLElement {
