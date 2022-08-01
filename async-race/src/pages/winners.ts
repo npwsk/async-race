@@ -1,4 +1,4 @@
-import getAllWinners from '../api/winners';
+import { getAllWinners } from '../api/winners';
 import Winner from '../types/winner';
 import Page from './page';
 

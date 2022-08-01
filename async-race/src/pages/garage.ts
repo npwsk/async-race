@@ -1,4 +1,4 @@
-import getAllCars from '../api/garage';
+import { getCars } from '../api/garage';
 import Car from '../types/car';
 import Page from './page';
 
@@ -14,7 +14,7 @@ class GaragePage extends Page {
   }
 
   async render(container: HTMLElement): Promise<void> {
-    this.cars = await getAllCars();
+    this.cars = await getCars();
 
     this.setPageAttribute(container);
     container.replaceChildren(this.getPageHeader());
