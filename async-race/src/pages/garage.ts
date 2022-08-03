@@ -33,25 +33,16 @@ class GaragePage extends Page {
     this.totalCarCount = 0;
     this.views = {
       forms: {
-        create: new Form('Create', async ({ name, color }: Omit<Car, 'id'>) => {
-          await createCar(name, color);
-          await this.update(true);
-        }),
+        create: new Form('Create', this.handleCarCreate.bind(this)),
       },
       carsList: new CarsList(this.cars, {
-        onDelete: async (deletedId: number): Promise<void> => {
-          await deleteCar(deletedId);
-          await this.update(true);
-          if (this.cars?.length === 0 && this.currentPage > 1) {
-            this.currentPage -= 1;
-            this.update(true);
-          }
-        },
+        onDelete: this.handleCarDelete.bind(this),
       }),
-      pagination: new Pagination(this.currentPage, this.totalPages, (newActive: number) => {
-        this.currentPage = newActive;
-        this.update(true);
-      }),
+      pagination: new Pagination(
+        this.currentPage,
+        this.totalPages,
+        this.handlePageChange.bind(this),
+      ),
       header: this.getPageHeader(),
     };
   }
@@ -92,6 +83,24 @@ class GaragePage extends Page {
     </header>`;
 
     return container.firstElementChild as HTMLElement;
+  }
+
+  handlePageChange(newActivePage: number): void {
+    this.currentPage = newActivePage;
+    this.update(true);
+  }
+
+  async handleCarCreate({ name, color }: Omit<Car, 'id'>): Promise<void> {
+    await createCar(name, color);
+    await this.update(true);
+  }
+
+  async handleCarDelete(deletedId: number): Promise<void> {
+    await deleteCar(deletedId);
+    await this.update(true);
+    if (this.cars?.length === 0 && this.currentPage > 1) {
+      this.handlePageChange(this.currentPage - 1);
+    }
   }
 }
 
