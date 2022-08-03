@@ -8,6 +8,7 @@ import Pagination from '../components/pagination';
 const CARS_PER_PAGE = 7;
 
 type GarageElems = {
+  header: HTMLElement;
   forms: Record<string, Form>;
   carsList: CarsList;
   pagination: Pagination;
@@ -15,6 +16,8 @@ type GarageElems = {
 
 class GaragePage extends Page {
   cars: Car[] | null;
+
+  totalCarCount: number;
 
   currentPage: number;
 
@@ -27,6 +30,7 @@ class GaragePage extends Page {
     this.cars = null;
     this.currentPage = 1;
     this.totalPages = 1;
+    this.totalCarCount = 0;
     this.views = {
       forms: {
         create: new Form('Create', async ({ name, color }: Omit<Car, 'id'>) => {
@@ -39,6 +43,7 @@ class GaragePage extends Page {
         this.currentPage = newActive;
         this.update(true);
       }),
+      header: this.getPageHeader(),
     };
   }
 
@@ -50,7 +55,9 @@ class GaragePage extends Page {
     if (shouldFetch || this.cars === null) {
       const { cars, total } = await this.fetchCars();
       this.cars = cars;
+      this.totalCarCount = total;
       this.totalPages = Math.ceil(total / CARS_PER_PAGE);
+      this.views.header.replaceWith(this.getPageHeader());
     }
     this.views.carsList.update(this.cars);
     this.views.pagination.update(this.currentPage, this.totalPages);
@@ -72,7 +79,7 @@ class GaragePage extends Page {
     container.innerHTML = `<header>
       <h1>${this.title}</h1>
       page: ${this.currentPage}
-      cars total: ${this.cars?.length || 0}
+      cars total: ${this.totalCarCount}
     </header>`;
 
     return container.firstElementChild as HTMLElement;
