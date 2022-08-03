@@ -1,4 +1,4 @@
-import { createCar, getCars } from '../api/garage';
+import { createCar, deleteCar, getCars } from '../api/garage';
 import Form from '../components/form';
 import Car from '../types/car';
 import Page from './page';
@@ -38,7 +38,16 @@ class GaragePage extends Page {
           await this.update(true);
         }),
       },
-      carsList: new CarsList(this.cars),
+      carsList: new CarsList(this.cars, {
+        onDelete: async (deletedId: number): Promise<void> => {
+          await deleteCar(deletedId);
+          await this.update(true);
+          if (this.cars?.length === 0 && this.currentPage > 1) {
+            this.currentPage -= 1;
+            this.update(true);
+          }
+        },
+      }),
       pagination: new Pagination(this.currentPage, this.totalPages, (newActive: number) => {
         this.currentPage = newActive;
         this.update(true);

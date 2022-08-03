@@ -25,7 +25,7 @@ class CarView {
       <h2 class="h3 me-auto">${this.name}</h2>
       <button class="btn btn-outline-primary btn-sm">Edit</button>
       <div class="vr"></div>
-      <button class="btn btn-danger btn-sm">Delete</button>
+      <button class="btn btn-danger btn-sm" data-action="delete-car">Delete</button>
     </div>
 
     <div class="car__track px-3 pb-0 border-bottom border-3">
