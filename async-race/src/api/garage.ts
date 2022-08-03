@@ -14,7 +14,7 @@ const getUrl = (id?: number): URL => {
   return url;
 };
 
-const getCars = async (params: GetCarsParams = {}): Promise<Car[]> => {
+const getCars = async (params: GetCarsParams = {}): Promise<{ cars: Car[]; total: number }> => {
   const url = getUrl();
 
   Object.entries(params).forEach(([param, value]) => {
@@ -24,19 +24,10 @@ const getCars = async (params: GetCarsParams = {}): Promise<Car[]> => {
   const response = await fetch(url);
 
   if (response.ok) {
-    const data: Car[] = await response.json();
-    return data;
-  }
-
-  throw new Error(`error: ${response.status}`);
-};
-
-const getTotalCars = async (): Promise<number> => {
-  const response = await fetch(getUrl());
-
-  if (response.ok) {
-    const data: Car[] = await response.json();
-    return data.length;
+    const cars: Car[] = await response.json();
+    const totalCars = response.headers.get('X-Total-Count');
+    const total = totalCars === null ? cars.length : Number(totalCars);
+    return { cars, total };
   }
 
   throw new Error(`error: ${response.status}`);
@@ -117,5 +108,5 @@ const updateCar = async (id: number, name: string, color: string): Promise<Car> 
 };
 
 export {
-  getCars, getTotalCars, getCar, createCar, deleteCar, updateCar,
+  getCars, getCar, createCar, deleteCar, updateCar,
 };

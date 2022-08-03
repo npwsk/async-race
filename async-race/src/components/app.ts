@@ -13,9 +13,9 @@ class App {
 
   nav: Nav;
 
-  garagePage: Garage;
+  garageView: Garage;
 
-  winnersPage: Winners;
+  winnersView: Winners;
 
   constructor() {
     const root = document.getElementById('root');
@@ -23,8 +23,8 @@ class App {
 
     this.elements = { root, currentPage };
     this.nav = new Nav();
-    this.garagePage = new Garage(PageIds.Garage);
-    this.winnersPage = new Winners(PageIds.Winners);
+    this.garageView = new Garage(PageIds.Garage);
+    this.winnersView = new Winners(PageIds.Winners);
   }
 
   renderPage(): void {
@@ -37,10 +37,10 @@ class App {
     switch (hash) {
       case '':
       case PageIds.Garage:
-        targetPage = this.garagePage;
+        targetPage = this.garageView;
         break;
       case PageIds.Winners:
-        targetPage = this.winnersPage;
+        targetPage = this.winnersView;
         break;
       default:
         targetPage = new NotFound();
