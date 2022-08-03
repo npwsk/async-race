@@ -22,7 +22,7 @@ class App {
     const currentPage = document.createElement('div');
 
     this.elements = { root, currentPage };
-    this.nav = new Nav();
+    this.nav = new Nav(PageIds.Garage);
     this.garageView = new Garage(PageIds.Garage);
     this.winnersView = new Winners(PageIds.Winners);
   }
@@ -38,9 +38,11 @@ class App {
       case '':
       case PageIds.Garage:
         targetPage = this.garageView;
+        this.nav.changeActive(PageIds.Garage);
         break;
       case PageIds.Winners:
         targetPage = this.winnersView;
+        this.nav.changeActive(PageIds.Winners);
         break;
       default:
         targetPage = new NotFound();

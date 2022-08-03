@@ -1,7 +1,7 @@
 class NavButton {
   private container: HTMLAnchorElement;
 
-  private id: string;
+  id: string;
 
   private text: string;
 
@@ -11,7 +11,18 @@ class NavButton {
     this.text = text;
   }
 
+  setState(active: boolean): void {
+    const { classList } = this.container;
+    if (active && !classList.contains('active')) {
+      this.container.classList.add('active');
+    }
+    if (!active) {
+      this.container.classList.remove('active');
+    }
+  }
+
   create(): HTMLElement {
+    this.container.classList.add('nav-link');
     this.container.textContent = this.text;
     this.container.href = `/#${this.id}`;
     return this.container;
