@@ -1,3 +1,5 @@
+const MIN_DISABLED_MS = 700;
+
 type ClickCallback = () => Promise<void>;
 
 type ButtonProps = {
@@ -32,19 +34,31 @@ class Button {
     this.elements = { button, label };
     this.onClick = props.onClick;
 
-    this.container.addEventListener('click', this);
+    this.elements.button.addEventListener('mousedown', this);
+    this.elements.button.addEventListener('click', this);
   }
 
   handleEvent(e: Event): void {
+    if (e.type === 'mousedown') {
+      e.preventDefault();
+    }
     if (e.type === 'click') {
       this.handleClick();
     }
   }
 
   async handleClick(): Promise<void> {
-    this.container.classList.add('disabled');
+    const start = Date.now();
+    this.elements.button.classList.add('disabled');
     await this.onClick();
-    this.container.classList.remove('disabled');
+    const dt = Date.now() - start;
+    if (dt < MIN_DISABLED_MS) {
+      setTimeout(() => {
+        this.elements.button.classList.remove('disabled');
+      }, MIN_DISABLED_MS - dt);
+    } else {
+      this.elements.button.classList.remove('disabled');
+    }
   }
 
   render(): HTMLDivElement {
