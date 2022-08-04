@@ -88,6 +88,8 @@ class GaragePage extends Page {
         cars: this.cars,
         onDelete: this.handleCarDelete.bind(this),
         onSelect: this.handleCarSelect.bind(this),
+        onStart: this.handleCarStart.bind(this),
+        onStop: this.handleCarStop.bind(this),
       }),
       pagination: new Pagination(
         this.currentPage,
@@ -168,12 +170,6 @@ class GaragePage extends Page {
     }
   }
 
-  async handleRandomBtn(): Promise<void> {
-    const cars = this.generateRandomCars(RANDOM_CARS_COUNT);
-    await Promise.allSettled(cars.map((car) => createCar(car.name, car.color)));
-    await this.update(true);
-  }
-
   handleCarSelect(id: number): void {
     this.selectedCarId = this.selectedCarId !== id ? id : null;
     const selectedCar = this.cars?.find((car) => car.id === this.selectedCarId);
@@ -185,6 +181,20 @@ class GaragePage extends Page {
     } else {
       this.views.contols.update.reset();
     }
+  }
+
+  async handleCarStart(id: number): Promise<void> {
+    console.log(id, this);
+  }
+
+  async handleCarStop(id: number): Promise<void> {
+    console.log(id, this);
+  }
+
+  async handleRandomBtn(): Promise<void> {
+    const cars = this.generateRandomCars(RANDOM_CARS_COUNT);
+    await Promise.allSettled(cars.map((car) => createCar(car.name, car.color)));
+    await this.update(true);
   }
 
   generateRandomCars(count: number): NewCar[] {

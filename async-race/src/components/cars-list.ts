@@ -7,6 +7,8 @@ type CarListProps = {
   cars: Car[] | null;
   onDelete: Callback;
   onSelect: Callback;
+  onStart: Callback;
+  onStop: Callback;
 };
 
 class CarsList {
@@ -18,34 +20,22 @@ class CarsList {
 
   private onSelect: Callback;
 
-  constructor({ cars, onDelete, onSelect }: CarListProps) {
+  private onStart: Callback;
+
+  private onStop: Callback;
+
+  constructor({
+    cars, onDelete, onSelect, onStart, onStop,
+  }: CarListProps) {
     this.container = document.createElement('div');
     this.container.classList.add('vstack', 'border', 'm-3');
-    this.carViews = cars?.map((car) => new CarView(car)) ?? [];
+    this.carViews = cars?.map((car) => new CarView({
+      car, onDelete, onSelect, onStart, onStop,
+    })) ?? [];
     this.onDelete = onDelete;
     this.onSelect = onSelect;
-    this.container.addEventListener('click', this);
-  }
-
-  handleEvent(e: Event): void {
-    if (e.type === 'click') {
-      this.handleClick(e);
-    }
-  }
-
-  handleClick(e: Event): void {
-    const target = e.target as HTMLElement;
-    const { action } = target.dataset;
-    const carEl = target.closest('[data-car-id]') as HTMLElement;
-    switch (action) {
-      case 'delete-car':
-        this.onDelete(Number(carEl.dataset.carId));
-        break;
-      case 'select-car':
-        this.onSelect(Number(carEl.dataset.carId));
-        break;
-      default:
-    }
+    this.onStart = onStart;
+    this.onStop = onStop;
   }
 
   update(cars: Car[]): HTMLElement {
@@ -55,8 +45,16 @@ class CarsList {
       this.container.replaceChildren(spinner);
       return this.container;
     }
-    this.carViews = cars.map((car) => new CarView(car));
-    this.container.replaceChildren(...this.carViews.map((view) => view.create()));
+    this.carViews = cars.map(
+      (car) => new CarView({
+        car,
+        onDelete: this.onDelete,
+        onSelect: this.onSelect,
+        onStart: this.onStart,
+        onStop: this.onStop,
+      }),
+    );
+    this.container.replaceChildren(...this.carViews.map((view) => view.render()));
     return this.container;
   }
 

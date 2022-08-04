@@ -1,6 +1,6 @@
 const MIN_DISABLED_MS = 700;
 
-type ClickCallback = () => Promise<void>;
+type ClickCallback = () => Promise<void> | void;
 
 type ButtonProps = {
   text: string;
@@ -14,9 +14,9 @@ type ButtonElements = {
 };
 
 class Button {
-  container: HTMLDivElement;
+  private container: HTMLDivElement;
 
-  elements: ButtonElements;
+  private elements: ButtonElements;
 
   private onClick: ClickCallback;
 
@@ -47,7 +47,7 @@ class Button {
     }
   }
 
-  async handleClick(): Promise<void> {
+  private async handleClick(): Promise<void> {
     const start = Date.now();
     this.elements.button.classList.add('disabled');
     await this.onClick();
