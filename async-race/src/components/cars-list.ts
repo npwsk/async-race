@@ -1,20 +1,29 @@
 import Car from '../types/car';
 import CarView from './car-view';
 
-type OnDeleteCallback = (id: number) => void;
+type Callback = (id: number) => void;
+
+type CarListProps = {
+  cars: Car[] | null;
+  onDelete: Callback;
+  onSelect: Callback;
+};
 
 class CarsList {
   container: HTMLElement;
 
-  private cars: Car[] | null;
+  private carViews: CarView[];
 
-  private onDelete: OnDeleteCallback;
+  private onDelete: Callback;
 
-  constructor(cars: Car[] | null, callbacks: { onDelete: OnDeleteCallback }) {
+  private onSelect: Callback;
+
+  constructor({ cars, onDelete, onSelect }: CarListProps) {
     this.container = document.createElement('div');
     this.container.classList.add('vstack', 'border', 'm-3');
-    this.cars = cars;
-    this.onDelete = callbacks.onDelete;
+    this.carViews = cars?.map((car) => new CarView(car)) ?? [];
+    this.onDelete = onDelete;
+    this.onSelect = onSelect;
     this.container.addEventListener('click', this);
   }
 
@@ -32,6 +41,9 @@ class CarsList {
       case 'delete-car':
         this.onDelete(Number(carEl.dataset.carId));
         break;
+      case 'select-car':
+        this.onSelect(Number(carEl.dataset.carId));
+        break;
       default:
     }
   }
@@ -43,9 +55,13 @@ class CarsList {
       this.container.replaceChildren(spinner);
       return this.container;
     }
-    const carViews = cars.map((car) => new CarView(car).create());
-    this.container.replaceChildren(...carViews);
+    this.carViews = cars.map((car) => new CarView(car));
+    this.container.replaceChildren(...this.carViews.map((view) => view.create()));
     return this.container;
+  }
+
+  setSelected(id: number | null): void {
+    this.carViews.forEach((view) => view.setSelected(view.id === id));
   }
 }
 

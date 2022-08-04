@@ -23,7 +23,7 @@ class CarView {
     this.container.classList.add('car', 'border-bottom', 'p-4', 'vstack', 'gap-3');
     this.container.innerHTML = `<div class="hstack gap-3 py-2 border-bottom">
       <h2 class="h3 me-auto">${this.name}</h2>
-      <button class="btn btn-outline-primary btn-sm">Edit</button>
+      <button class="btn btn-outline-primary btn-sm" data-action="select-car">Select</button>
       <div class="vr"></div>
       <button class="btn btn-danger btn-sm" data-action="delete-car">Delete</button>
     </div>
@@ -40,6 +40,14 @@ class CarView {
     </div>`;
 
     return this.container;
+  }
+
+  setSelected(isSelected: boolean): void {
+    if (isSelected) {
+      this.container.classList.add('bg-primary');
+    } else {
+      this.container.classList.remove('bg-primary');
+    }
   }
 }
 

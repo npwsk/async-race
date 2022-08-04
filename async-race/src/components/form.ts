@@ -1,8 +1,8 @@
 import Car from '../types/car';
 
-const DEFAULT_COLOR = '#ffffff';
+const DEFAULT_COLOR = '#ffc107';
 
-type SubmitCallback = (props: Omit<Car, 'id'>) => void;
+type Callback<T> = (props: T) => void;
 
 interface InputFieldProps {
   type?: string;
@@ -12,18 +12,18 @@ interface InputFieldProps {
   value?: string;
 }
 
-class Form {
+class Form<CallbackParams> {
   container: HTMLElement;
 
   private action: string;
 
-  private onSubmit: SubmitCallback;
+  private onSubmit: Callback<CallbackParams>;
 
   private inputFields: Record<string, HTMLInputElement>;
 
   private submitBtn: HTMLButtonElement;
 
-  constructor(actionText: string, onSubmit: SubmitCallback) {
+  constructor(actionText: string, onSubmit: Callback<CallbackParams>) {
     this.action = actionText;
     this.onSubmit = onSubmit;
     this.container = document.createElement('form');
@@ -54,7 +54,7 @@ class Form {
     e.preventDefault();
     const values = Object.entries(this.inputFields).map(([name, field]) => [name, field.value]);
     this.onSubmit(Object.fromEntries(values));
-    this.updateValues({ name: '', color: DEFAULT_COLOR });
+    this.reset();
   }
 
   static createInputField(props: InputFieldProps = {}, classList: string[] = []): HTMLInputElement {
@@ -81,6 +81,10 @@ class Form {
         this.inputFields[name].value = value;
       }
     });
+  }
+
+  reset(): void {
+    this.updateValues({ name: '', color: DEFAULT_COLOR });
   }
 }
 

@@ -1,4 +1,6 @@
-import { createCar, deleteCar, getCars } from '../api/garage';
+import {
+  createCar, deleteCar, getCars, updateCar,
+} from '../api/garage';
 import Form from '../components/form';
 import Car from '../types/car';
 import Page from './page';
@@ -37,7 +39,8 @@ const CAR_MODELS = [
 type NewCar = Omit<Car, 'id'>;
 
 type GarageControls = {
-  create: Form;
+  create: Form<Omit<Car, 'id'>>;
+  update: Form<Car>;
   random: Button;
 };
 
@@ -57,6 +60,8 @@ class GaragePage extends Page {
 
   totalPages: number;
 
+  selectedCarId: number | null;
+
   views: GarageElems;
 
   constructor(id: string) {
@@ -65,9 +70,11 @@ class GaragePage extends Page {
     this.currentPage = 1;
     this.totalPages = 1;
     this.totalCarCount = 0;
+    this.selectedCarId = null;
     this.views = {
       contols: {
         create: new Form('Create', this.handleCarCreate.bind(this)),
+        update: new Form('Update', this.handleCarUpdate.bind(this)),
         random: new Button(
           {
             label: `Generate ${RANDOM_CARS_COUNT} random cars`,
@@ -77,8 +84,10 @@ class GaragePage extends Page {
           ['btn-primary'],
         ),
       },
-      carsList: new CarsList(this.cars, {
+      carsList: new CarsList({
+        cars: this.cars,
         onDelete: this.handleCarDelete.bind(this),
+        onSelect: this.handleCarSelect.bind(this),
       }),
       pagination: new Pagination(
         this.currentPage,
@@ -111,9 +120,10 @@ class GaragePage extends Page {
     const header = this.getPageHeader();
     const randomBtn = this.views.contols.random.render();
     const createForm = this.views.contols.create.container;
+    const updateForm = this.views.contols.update.container;
     const controls = document.createElement('div');
     controls.classList.add('container');
-    controls.append(createForm, randomBtn);
+    controls.append(createForm, updateForm, randomBtn);
     const carsList = this.views.carsList.container;
     const pagination = this.views.pagination.container;
 
@@ -142,6 +152,14 @@ class GaragePage extends Page {
     await this.update(true);
   }
 
+  async handleCarUpdate({ name, color }: Omit<Car, 'id'>): Promise<void> {
+    if (this.selectedCarId === null) {
+      return;
+    }
+    await updateCar(this.selectedCarId, name, color);
+    await this.update(true);
+  }
+
   async handleCarDelete(deletedId: number): Promise<void> {
     await deleteCar(deletedId);
     await this.update(true);
@@ -156,6 +174,19 @@ class GaragePage extends Page {
     await this.update(true);
   }
 
+  handleCarSelect(id: number): void {
+    this.selectedCarId = this.selectedCarId !== id ? id : null;
+    const selectedCar = this.cars?.find((car) => car.id === this.selectedCarId);
+
+    this.views.carsList.setSelected(this.selectedCarId);
+    if (selectedCar) {
+      const { name, color } = selectedCar;
+      this.views.contols.update.updateValues({ name, color });
+    } else {
+      this.views.contols.update.reset();
+    }
+  }
+
   generateRandomCars(count: number): NewCar[] {
     const cars = Array(count).fill(null).map(GaragePage.getRandomCar.bind(this));
     return cars;
@@ -165,9 +196,12 @@ class GaragePage extends Page {
     const brand = CAR_BRANDS[getRandom(0, CAR_BRANDS.length - 1)];
     const model = CAR_MODELS[getRandom(0, CAR_MODELS.length - 1)];
     const name = `${brand} ${model}`;
-    const colors = ['r', 'g', 'b'].map(() => getRandom(0, 255));
-    const color = `rgb(${colors.join(', ')})`;
-    return { name, color };
+    const color = ['r', 'g', 'b']
+      .map(() => getRandom(0, 255))
+      .map((dec) => dec.toString(16).padStart(2, '0'))
+      .join('');
+    // const color = `rgb(${colors.join(', ')})`;
+    return { name, color: `#${color}` };
   }
 }
 
