@@ -1,9 +1,16 @@
-import { startCarEngine, stopCarEngine } from '../api/engine';
+import { driveCar, startCarEngine, stopCarEngine } from '../api/engine';
 import Car from '../types/car';
 import Button from './button';
 import CarTrack from './car-track';
 
 type Callback<T> = (id: number) => T;
+
+enum CarState {
+  Starting = 'starting',
+  Stopped = 'stopped',
+  Stopping = 'stopping',
+  Driving = 'driving',
+}
 
 type CarViewProps = {
   car: Car;
@@ -28,6 +35,8 @@ class CarView {
 
   onSelect: Callback<void>;
 
+  state: CarState;
+
   constructor({ car, onDelete, onSelect }: CarViewProps) {
     this.id = car.id;
     this.name = car.name;
@@ -47,13 +56,15 @@ class CarView {
         'btn-primary',
         'btn-sm',
       ]),
-      stop: new Button({ text: 'Stop', onClick: this.handleStop.bind(this), disabled: true }, [
+      stop: new Button({ text: 'Stop', onClick: this.handleStop.bind(this) }, [
         'btn-primary',
         'btn-sm',
       ]),
     };
     this.onDelete = onDelete;
     this.onSelect = onSelect;
+    this.state = CarState.Stopped;
+    this.setButtonsState(this.state);
   }
 
   render(): HTMLElement {
@@ -102,27 +113,67 @@ class CarView {
   }
 
   async handleStart(): Promise<void> {
-    this.controls.start.disable();
-    this.controls.stop.enable();
+    this.state = CarState.Starting;
+    this.setButtonsState(this.state);
 
     const { distance, velocity } = await startCarEngine(this.id);
     const animationTime = distance / velocity;
     this.carTrack.resetSvgPosition();
-    this.carTrack.startAnimation(animationTime);
 
-    setTimeout(() => {
-      this.controls.stop.disable();
-      this.controls.start.enable();
-    }, animationTime);
+    try {
+      this.state = CarState.Driving;
+      this.setButtonsState(this.state);
+
+      this.carTrack.startAnimation(animationTime);
+
+      await driveCar(this.id);
+
+      this.state = CarState.Stopped;
+      this.setButtonsState(this.state);
+    } catch (e) {
+      this.state = CarState.Stopped;
+      this.setButtonsState(this.state);
+
+      this.carTrack.stopAnimation();
+    }
   }
 
   async handleStop(): Promise<void> {
-    await stopCarEngine(this.id);
-    this.carTrack.stopAnimation();
-    this.carTrack.resetSvgPosition();
+    if (this.state === CarState.Driving) {
+      this.state = CarState.Stopping;
+      this.setButtonsState(this.state);
 
-    this.controls.stop.disable();
-    this.controls.start.enable();
+      await stopCarEngine(this.id);
+      this.carTrack.stopAnimation();
+      this.carTrack.resetSvgPosition();
+
+      this.state = CarState.Stopped;
+      this.setButtonsState(this.state);
+    }
+  }
+
+  private setButtonsState(state: CarState): void {
+    switch (state) {
+      case CarState.Stopped:
+        this.controls.stop.disable();
+        this.controls.start.enable();
+        this.controls.select.enable();
+        this.controls.delete.enable();
+        break;
+      case CarState.Starting:
+      case CarState.Stopping:
+        (Object.keys(this.controls) as Array<keyof typeof this.controls>).forEach((key) => {
+          this.controls[key].disable();
+        });
+        break;
+      case CarState.Driving:
+        this.controls.stop.enable();
+        this.controls.start.disable();
+        this.controls.select.disable();
+        this.controls.delete.disable();
+        break;
+      default:
+    }
   }
 }
 

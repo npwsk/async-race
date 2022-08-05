@@ -47,9 +47,9 @@ const driveCar = async (id: number): Promise<void> => {
   const status = 'drive';
   const response = await changeEngineStatus(id, status);
 
-  const data: { status: boolean } = await response.json();
-
-  if (!data.status) {
+  if (response.ok) {
+    const data: { status: boolean } = await response.json();
+  } else {
     const error = await response.text();
     throw new Error(`error: ${error}`);
   }

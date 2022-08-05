@@ -4,7 +4,6 @@ type ButtonProps = {
   text: string;
   onClick: ClickCallback;
   label?: string;
-  disabled?: boolean;
 };
 
 type ButtonElements = {
@@ -25,7 +24,6 @@ class Button {
     const button = document.createElement('button');
     button.classList.add('btn', ...classList);
     button.textContent = props.text;
-    button.disabled = Boolean(props.disabled);
 
     const label = document.createElement('span');
     label.textContent = props.label ?? '';
