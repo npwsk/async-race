@@ -1,9 +1,5 @@
 import API_URL from '../config';
-
-type EngineParams = {
-  velocity: number;
-  distance: number;
-};
+import Engine from '../types/engine';
 
 const getUrl = (): URL => new URL('/engine', API_URL);
 
@@ -21,12 +17,12 @@ const changeEngineStatus = async (id: number, status: string): Promise<Response>
   return response;
 };
 
-const startCarEngine = async (id: number): Promise<EngineParams> => {
+const startCarEngine = async (id: number): Promise<Engine> => {
   const status = 'started';
   const response = await changeEngineStatus(id, status);
 
   if (response.ok) {
-    const data: EngineParams = await response.json();
+    const data: Engine = await response.json();
     return data;
   }
 
@@ -34,12 +30,12 @@ const startCarEngine = async (id: number): Promise<EngineParams> => {
   throw new Error(`error: ${error}`);
 };
 
-const stopCarEngine = async (id: number): Promise<EngineParams> => {
+const stopCarEngine = async (id: number): Promise<Engine> => {
   const status = 'stopped';
   const response = await changeEngineStatus(id, status);
 
   if (response.ok) {
-    const data: EngineParams = await response.json();
+    const data: Engine = await response.json();
     return data;
   }
 

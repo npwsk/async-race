@@ -7,7 +7,7 @@ import Page from './page';
 import CarsList from '../components/cars-list';
 import Pagination from '../components/pagination';
 import Button from '../components/button';
-import getRandom from '../helpers';
+import { getRandom } from '../helpers';
 
 const CARS_PER_PAGE = 7;
 const RANDOM_CARS_COUNT = 100;
@@ -88,8 +88,6 @@ class GaragePage extends Page {
         cars: this.cars,
         onDelete: this.handleCarDelete.bind(this),
         onSelect: this.handleCarSelect.bind(this),
-        onStart: this.handleCarStart.bind(this),
-        onStop: this.handleCarStop.bind(this),
       }),
       pagination: new Pagination(
         this.currentPage,
@@ -183,14 +181,6 @@ class GaragePage extends Page {
     }
   }
 
-  async handleCarStart(id: number): Promise<void> {
-    console.log(id, this);
-  }
-
-  async handleCarStop(id: number): Promise<void> {
-    console.log(id, this);
-  }
-
   async handleRandomBtn(): Promise<void> {
     const cars = this.generateRandomCars(RANDOM_CARS_COUNT);
     await Promise.allSettled(cars.map((car) => createCar(car.name, car.color)));
@@ -210,7 +200,6 @@ class GaragePage extends Page {
       .map(() => getRandom(0, 255))
       .map((dec) => dec.toString(16).padStart(2, '0'))
       .join('');
-    // const color = `rgb(${colors.join(', ')})`;
     return { name, color: `#${color}` };
   }
 }

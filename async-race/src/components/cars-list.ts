@@ -1,14 +1,12 @@
 import Car from '../types/car';
 import CarView from './car-view';
 
-type Callback = (id: number) => void;
+type Callback<T> = (id: number) => T;
 
 type CarListProps = {
   cars: Car[] | null;
-  onDelete: Callback;
-  onSelect: Callback;
-  onStart: Callback;
-  onStop: Callback;
+  onDelete: Callback<void>;
+  onSelect: Callback<void>;
 };
 
 class CarsList {
@@ -16,26 +14,22 @@ class CarsList {
 
   private carViews: CarView[];
 
-  private onDelete: Callback;
+  private onDelete: Callback<void>;
 
-  private onSelect: Callback;
+  private onSelect: Callback<void>;
 
-  private onStart: Callback;
-
-  private onStop: Callback;
-
-  constructor({
-    cars, onDelete, onSelect, onStart, onStop,
-  }: CarListProps) {
+  constructor({ cars, onDelete, onSelect }: CarListProps) {
     this.container = document.createElement('div');
     this.container.classList.add('vstack', 'border', 'm-3');
-    this.carViews = cars?.map((car) => new CarView({
-      car, onDelete, onSelect, onStart, onStop,
-    })) ?? [];
+    this.carViews = cars?.map(
+      (car) => new CarView({
+        car,
+        onDelete,
+        onSelect,
+      }),
+    ) ?? [];
     this.onDelete = onDelete;
     this.onSelect = onSelect;
-    this.onStart = onStart;
-    this.onStop = onStop;
   }
 
   update(cars: Car[]): HTMLElement {
@@ -50,8 +44,6 @@ class CarsList {
         car,
         onDelete: this.onDelete,
         onSelect: this.onSelect,
-        onStart: this.onStart,
-        onStop: this.onStop,
       }),
     );
     this.container.replaceChildren(...this.carViews.map((view) => view.render()));

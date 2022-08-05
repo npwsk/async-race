@@ -1,5 +1,3 @@
-const MIN_DISABLED_MS = 700;
-
 type ClickCallback = () => Promise<void> | void;
 
 type ButtonProps = {
@@ -48,23 +46,21 @@ class Button {
   }
 
   private async handleClick(): Promise<void> {
-    const start = Date.now();
-    this.elements.button.classList.add('disabled');
     await this.onClick();
-    const dt = Date.now() - start;
-    if (dt < MIN_DISABLED_MS) {
-      setTimeout(() => {
-        this.elements.button.classList.remove('disabled');
-      }, MIN_DISABLED_MS - dt);
-    } else {
-      this.elements.button.classList.remove('disabled');
-    }
   }
 
   render(): HTMLDivElement {
     const { label, button } = this.elements;
     this.container.replaceChildren(label, button);
     return this.container;
+  }
+
+  disable(): void {
+    this.elements.button.classList.add('disabled');
+  }
+
+  enable(): void {
+    this.elements.button.classList.remove('disabled');
   }
 }
 
