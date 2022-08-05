@@ -1,4 +1,4 @@
-import { startCarEngine } from '../api/engine';
+import { startCarEngine, stopCarEngine } from '../api/engine';
 import Car from '../types/car';
 import Button from './button';
 import CarTrack from './car-track';
@@ -47,8 +47,8 @@ class CarView {
         'btn-primary',
         'btn-sm',
       ]),
-      stop: new Button({ text: 'Stop', onClick: this.handleStop.bind(this) }, [
-        'btn-secondary',
+      stop: new Button({ text: 'Stop', onClick: this.handleStop.bind(this), disabled: true }, [
+        'btn-primary',
         'btn-sm',
       ]),
     };
@@ -102,16 +102,27 @@ class CarView {
   }
 
   async handleStart(): Promise<void> {
-    const { distance, velocity } = await startCarEngine(this.id);
     this.controls.start.disable();
+    this.controls.stop.enable();
+
+    const { distance, velocity } = await startCarEngine(this.id);
     const animationTime = distance / velocity;
     this.carTrack.resetSvgPosition();
     this.carTrack.startAnimation(animationTime);
-    setTimeout(() => this.controls.start.enable(), animationTime);
+
+    setTimeout(() => {
+      this.controls.stop.disable();
+      this.controls.start.enable();
+    }, animationTime);
   }
 
-  handleStop(): void {
-    console.log(this);
+  async handleStop(): Promise<void> {
+    await stopCarEngine(this.id);
+    this.carTrack.stopAnimation();
+    this.carTrack.resetSvgPosition();
+
+    this.controls.stop.disable();
+    this.controls.start.enable();
   }
 }
 

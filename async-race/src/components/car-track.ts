@@ -1,5 +1,3 @@
-import { startAnimation } from '../helpers';
-
 const SVG_PATH = 'spritemap.svg#sprite-car';
 const SVG_WIDTH = 100;
 const SVG_HEIGHT = 50;
@@ -10,6 +8,8 @@ class CarTrack {
   private svg: SVGSVGElement;
 
   private svgColor: string;
+
+  private rAFId?: number;
 
   constructor(svgColor: string) {
     this.container = document.createElement('div');
@@ -39,13 +39,34 @@ class CarTrack {
     const endX = this.container.clientWidth - startX * 2;
     const trackWidth = endX - startX;
 
-    startAnimation({
-      durationMs,
-      draw: (progress) => {
-        const position = (trackWidth - SVG_WIDTH) * progress;
-        this.setSvgXCoord(position, 'px');
-      },
-    });
+    const draw = (progress: number): void => {
+      const position = (trackWidth - SVG_WIDTH) * progress;
+      this.setSvgXCoord(position, 'px');
+    };
+
+    const start = performance.now();
+
+    const animate = (time: number): void => {
+      let timeFraction = (time - start) / durationMs;
+
+      if (timeFraction > 1) {
+        timeFraction = 1;
+      }
+
+      draw(timeFraction);
+
+      if (timeFraction < 1) {
+        this.rAFId = requestAnimationFrame(animate);
+      }
+    };
+
+    this.rAFId = requestAnimationFrame(animate);
+  }
+
+  stopAnimation(): void {
+    if (this.rAFId) {
+      cancelAnimationFrame(this.rAFId);
+    }
   }
 
   resetSvgPosition(): void {

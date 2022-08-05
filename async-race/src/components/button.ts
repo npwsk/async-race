@@ -2,8 +2,9 @@ type ClickCallback = () => Promise<void> | void;
 
 type ButtonProps = {
   text: string;
-  label?: string;
   onClick: ClickCallback;
+  label?: string;
+  disabled?: boolean;
 };
 
 type ButtonElements = {
@@ -20,11 +21,11 @@ class Button {
 
   constructor(props: ButtonProps, classList: string[] = []) {
     this.container = document.createElement('div');
-    this.container.classList.add('hstack', 'gap-3');
 
     const button = document.createElement('button');
     button.classList.add('btn', ...classList);
     button.textContent = props.text;
+    button.disabled = Boolean(props.disabled);
 
     const label = document.createElement('span');
     label.textContent = props.label ?? '';
@@ -51,16 +52,17 @@ class Button {
 
   render(): HTMLDivElement {
     const { label, button } = this.elements;
+    this.container.classList.add('hstack', 'gap-3');
     this.container.replaceChildren(label, button);
     return this.container;
   }
 
   disable(): void {
-    this.elements.button.classList.add('disabled');
+    this.elements.button.disabled = true;
   }
 
   enable(): void {
-    this.elements.button.classList.remove('disabled');
+    this.elements.button.disabled = false;
   }
 }
 

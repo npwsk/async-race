@@ -7,7 +7,7 @@ import Page from './page';
 import CarsList from '../components/cars-list';
 import Pagination from '../components/pagination';
 import Button from '../components/button';
-import { getRandom } from '../helpers';
+import getRandom from '../helpers';
 
 const CARS_PER_PAGE = 7;
 const RANDOM_CARS_COUNT = 100;
