@@ -53,6 +53,33 @@ class CarsList {
   setSelected(id: number | null): void {
     this.carViews.forEach((view) => view.setSelected(view.id === id));
   }
+
+  async startRace(): Promise<number> {
+    const promises = this.carViews.map((view) => view.startEngine());
+    const startEngineResults = await Promise.allSettled(promises);
+
+    const drivePromises = startEngineResults
+      .map((result, index) => ({ result, index }))
+      .filter(({ result }) => result.status === 'fulfilled')
+      .map(({ result, index }) => ({
+        value: (result as PromiseFulfilledResult<number>).value,
+        index,
+      }))
+      .map(({ value, index }) => this.carViews[index].driveCar(value));
+
+    try {
+      const winner = await Promise.any(drivePromises);
+      console.log(winner);
+    } catch (e) {
+      console.log('no winners');
+    }
+
+    return 0;
+  }
+
+  resetRace(): void {
+    this.carViews.forEach((view) => view.reset());
+  }
 }
 
 export default CarsList;

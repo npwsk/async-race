@@ -19,23 +19,23 @@ type CarViewProps = {
 };
 
 class CarView {
-  container: HTMLElement;
+  readonly id: number;
 
-  carTrack: CarTrack;
+  private container: HTMLElement;
 
-  id: number;
+  private carTrack: CarTrack;
 
-  name: string;
+  private name: string;
 
-  color: string;
+  private color: string;
 
-  controls: Record<'select' | 'delete' | 'start' | 'stop', Button>;
+  private controls: Record<'select' | 'delete' | 'start' | 'stop', Button>;
 
-  onDelete: Callback<void>;
+  private onDelete: Callback<void>;
 
-  onSelect: Callback<void>;
+  private onSelect: Callback<void>;
 
-  state: CarState;
+  private state: CarState;
 
   constructor({ car, onDelete, onSelect }: CarViewProps) {
     this.id = car.id;
@@ -104,41 +104,27 @@ class CarView {
     }
   }
 
-  async handleDelete(): Promise<void> {
+  private async handleDelete(): Promise<void> {
     this.onDelete(this.id);
   }
 
-  async handleSelect(): Promise<void> {
+  private async handleSelect(): Promise<void> {
     this.onSelect(this.id);
   }
 
-  async handleStart(): Promise<void> {
-    this.state = CarState.Starting;
-    this.setButtonsState(this.state);
+  private async handleStart(): Promise<void> {
+    const animationTime = await this.startEngine();
 
-    const { distance, velocity } = await startCarEngine(this.id);
-    const animationTime = distance / velocity;
     this.carTrack.resetSvgPosition();
 
     try {
-      this.state = CarState.Driving;
-      this.setButtonsState(this.state);
-
-      this.carTrack.startAnimation(animationTime);
-
-      await driveCar(this.id);
-
-      this.state = CarState.Stopped;
-      this.setButtonsState(this.state);
+      await this.driveCar(animationTime);
     } catch (e) {
-      this.state = CarState.Stopped;
-      this.setButtonsState(this.state);
-
-      this.carTrack.stopAnimation();
+      this.stopCar();
     }
   }
 
-  async handleStop(): Promise<void> {
+  private async handleStop(): Promise<void> {
     if (this.state === CarState.Driving) {
       this.state = CarState.Stopping;
       this.setButtonsState(this.state);
@@ -150,6 +136,44 @@ class CarView {
       this.state = CarState.Stopped;
       this.setButtonsState(this.state);
     }
+  }
+
+  async startEngine(): Promise<number> {
+    this.state = CarState.Starting;
+    this.setButtonsState(this.state);
+
+    const { distance, velocity } = await startCarEngine(this.id);
+    const estimatedTime = distance / velocity;
+    return estimatedTime;
+  }
+
+  async driveCar(estimatedTime: number): Promise<{ id: number; time: number }> {
+    try {
+      this.state = CarState.Driving;
+      this.setButtonsState(this.state);
+
+      this.carTrack.startAnimation(estimatedTime);
+
+      await driveCar(this.id);
+
+      this.state = CarState.Stopped;
+      this.setButtonsState(this.state);
+      return { id: this.id, time: estimatedTime };
+    } catch (e) {
+      this.stopCar();
+      throw e;
+    }
+  }
+
+  stopCar(): void {
+    this.state = CarState.Stopped;
+    this.setButtonsState(this.state);
+
+    this.carTrack.stopAnimation();
+  }
+
+  reset(): void {
+    this.carTrack.resetSvgPosition();
   }
 
   private setButtonsState(state: CarState): void {

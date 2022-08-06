@@ -42,6 +42,8 @@ type GarageControls = {
   create: Form<Omit<Car, 'id'>>;
   update: Form<Car>;
   random: Button;
+  startRace: Button;
+  resetRace: Button;
 };
 
 type GarageElems = {
@@ -77,9 +79,25 @@ class GaragePage extends Page {
         update: new Form('Update', this.handleCarUpdate.bind(this)),
         random: new Button(
           {
-            label: `Generate ${RANDOM_CARS_COUNT} random cars`,
+            label: `Generate ${RANDOM_CARS_COUNT} random cars:`,
             text: 'Generate',
             onClick: this.handleRandomBtn.bind(this),
+          },
+          ['btn-primary'],
+        ),
+        startRace: new Button(
+          {
+            label: 'Start race:',
+            text: 'Race',
+            onClick: this.handleRaceStart.bind(this),
+          },
+          ['btn-primary'],
+        ),
+        resetRace: new Button(
+          {
+            label: 'Reset all cars:',
+            text: 'Reset',
+            onClick: this.handleRaceReset.bind(this),
           },
           ['btn-primary'],
         ),
@@ -119,11 +137,13 @@ class GaragePage extends Page {
 
     const header = this.getPageHeader();
     const randomBtn = this.views.contols.random.render();
+    const startRace = this.views.contols.startRace.render();
+    const resetRace = this.views.contols.resetRace.render();
     const createForm = this.views.contols.create.container;
     const updateForm = this.views.contols.update.container;
     const controls = document.createElement('div');
-    controls.classList.add('container');
-    controls.append(createForm, updateForm, randomBtn);
+    controls.classList.add('container', 'vstack', 'gap-3');
+    controls.append(createForm, updateForm, randomBtn, startRace, resetRace);
     const carsList = this.views.carsList.container;
     const pagination = this.views.pagination.container;
 
@@ -185,6 +205,15 @@ class GaragePage extends Page {
     const cars = this.generateRandomCars(RANDOM_CARS_COUNT);
     await Promise.allSettled(cars.map((car) => createCar(car.name, car.color)));
     await this.update(true);
+  }
+
+  async handleRaceStart(): Promise<void> {
+    const winnerId = await this.views.carsList.startRace();
+    console.log(winnerId);
+  }
+
+  handleRaceReset(): void {
+    this.views.carsList.resetRace();
   }
 
   generateRandomCars(count: number): NewCar[] {
