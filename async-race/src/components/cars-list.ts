@@ -1,4 +1,5 @@
 import Car from '../types/car';
+import Alert from './alert';
 import CarView from './car-view';
 
 type Callback<T> = (id: number) => T;
@@ -9,8 +10,22 @@ type CarListProps = {
   onSelect: Callback<void>;
 };
 
+export type RaceResult =
+  | {
+    hasWinners: true;
+    winner: RaceWinner;
+  }
+  | { hasWinners: false };
+
+type RaceWinner = {
+  id: number;
+  time: number;
+};
+
 class CarsList {
   container: HTMLElement;
+
+  private alert: Alert;
 
   private carViews: CarView[];
 
@@ -30,6 +45,7 @@ class CarsList {
     ) ?? [];
     this.onDelete = onDelete;
     this.onSelect = onSelect;
+    this.alert = new Alert();
   }
 
   update(cars: Car[]): HTMLElement {
@@ -47,6 +63,10 @@ class CarsList {
       }),
     );
     this.container.replaceChildren(...this.carViews.map((view) => view.render()));
+
+    const alert = this.alert.render();
+    this.container.append(alert);
+
     return this.container;
   }
 
@@ -54,7 +74,7 @@ class CarsList {
     this.carViews.forEach((view) => view.setSelected(view.id === id));
   }
 
-  async startRace(): Promise<number> {
+  async startRace(): Promise<RaceResult> {
     const promises = this.carViews.map((view) => view.startEngine());
     const startEngineResults = await Promise.allSettled(promises);
 
@@ -69,12 +89,15 @@ class CarsList {
 
     try {
       const winner = await Promise.any(drivePromises);
-      console.log(winner);
+      return {
+        hasWinners: true,
+        winner,
+      };
     } catch (e) {
-      console.log('no winners');
+      return {
+        hasWinners: false,
+      };
     }
-
-    return 0;
   }
 
   resetRace(): void {

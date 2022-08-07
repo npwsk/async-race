@@ -1,1 +1,17 @@
 @import "~bootstrap/scss/bootstrap";
+
+.toast-container {
+  --bs-bg-opacity: 0.3;
+
+  transition: all 0.3s ease-in-out;
+  pointer-events: auto;
+  visibility: hidden;
+  opacity: 0;
+  transform: scale(1.1);
+
+  &.show {
+    visibility: visible;
+    opacity: 1;
+    transform: scale(1);
+  }
+}

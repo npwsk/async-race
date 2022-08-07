@@ -8,6 +8,7 @@ import CarsList from '../components/cars-list';
 import Pagination from '../components/pagination';
 import Button from '../components/button';
 import getRandom from '../helpers';
+import Alert from '../components/alert';
 
 const CARS_PER_PAGE = 7;
 const RANDOM_CARS_COUNT = 100;
@@ -51,6 +52,7 @@ type GarageElems = {
   contols: GarageControls;
   carsList: CarsList;
   pagination: Pagination;
+  alert: Alert;
 };
 
 class GaragePage extends Page {
@@ -113,6 +115,7 @@ class GaragePage extends Page {
         this.handlePageChange.bind(this),
       ),
       header: this.getPageHeader(),
+      alert: new Alert(),
     };
   }
 
@@ -148,7 +151,7 @@ class GaragePage extends Page {
     const pagination = this.views.pagination.container;
 
     this.setPageAttribute(container);
-    container.replaceChildren(header, controls, carsList, pagination);
+    container.replaceChildren(header, controls, carsList, pagination, this.views.alert.render());
   }
 
   getPageHeader(): HTMLElement {
@@ -208,8 +211,21 @@ class GaragePage extends Page {
   }
 
   async handleRaceStart(): Promise<void> {
-    const winnerId = await this.views.carsList.startRace();
-    console.log(winnerId);
+    const raceResult = await this.views.carsList.startRace();
+    let title: string;
+    let message: string;
+    if (raceResult.hasWinners) {
+      const { id, time } = raceResult.winner;
+      const timeSec = new Date(time).getSeconds();
+      title = 'Race completed with a win!';
+      message = `${this.cars?.find((car) => car.id === id)?.name} won with ${timeSec}s time`;
+    } else {
+      title = 'Race completed with no winners';
+      message = '';
+    }
+    this.views.alert.render(title, message);
+    this.views.alert.show();
+    setTimeout(() => this.views.alert.hide(), 5000);
   }
 
   handleRaceReset(): void {
