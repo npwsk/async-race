@@ -10,7 +10,9 @@ import Button from '../components/button';
 import getRandom from '../helpers';
 import Alert from '../components/alert';
 import Header from '../components/header';
-import { createWinner, getWinner, updateWinner } from '../api/winners';
+import {
+  createWinner, deleteWinner, getWinner, updateWinner,
+} from '../api/winners';
 
 const CARS_PER_PAGE = 7;
 const RANDOM_CARS_COUNT = 100;
@@ -176,6 +178,7 @@ class GaragePage extends Page {
 
   async handleCarDelete(deletedId: number): Promise<void> {
     await deleteCar(deletedId);
+    await deleteWinner(deletedId).catch(() => {});
     await this.update(true);
     if (this.cars?.length === 0 && this.currentPage > 1) {
       this.handlePageChange(this.currentPage - 1);
