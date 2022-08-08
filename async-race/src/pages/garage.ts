@@ -9,6 +9,7 @@ import Pagination from '../components/pagination';
 import Button from '../components/button';
 import getRandom from '../helpers';
 import Alert from '../components/alert';
+import Header from '../components/header';
 
 const CARS_PER_PAGE = 7;
 const RANDOM_CARS_COUNT = 100;
@@ -48,7 +49,7 @@ type GarageControls = {
 };
 
 type GarageElems = {
-  header: HTMLElement;
+  header: Header;
   contols: GarageControls;
   carsList: CarsList;
   pagination: Pagination;
@@ -114,7 +115,7 @@ class GaragePage extends Page {
         this.totalPages,
         this.handlePageChange.bind(this),
       ),
-      header: this.getPageHeader(),
+      header: new Header('Garage'),
       alert: new Alert(),
     };
   }
@@ -129,7 +130,7 @@ class GaragePage extends Page {
       this.cars = cars;
       this.totalCarCount = total;
       this.totalPages = Math.ceil(total / CARS_PER_PAGE);
-      this.views.header.replaceWith(this.getPageHeader());
+      this.views.header.render(this.currentPage, this.totalCarCount);
     }
     this.views.carsList.update(this.cars);
     this.views.pagination.update(this.currentPage, this.totalPages);
@@ -138,7 +139,7 @@ class GaragePage extends Page {
   async render(container: HTMLElement): Promise<void> {
     await this.update();
 
-    const header = this.getPageHeader();
+    const header = this.views.header.render(this.currentPage, this.totalCarCount);
     const randomBtn = this.views.contols.random.render();
     const startRace = this.views.contols.startRace.render();
     const resetRace = this.views.contols.resetRace.render();
@@ -152,17 +153,6 @@ class GaragePage extends Page {
 
     this.setPageAttribute(container);
     container.replaceChildren(header, controls, carsList, pagination, this.views.alert.render());
-  }
-
-  getPageHeader(): HTMLElement {
-    const container = document.createElement('div');
-    container.innerHTML = `<header>
-      <h1>${this.title}</h1>
-      page: ${this.currentPage}
-      cars total: ${this.totalCarCount}
-    </header>`;
-
-    return container.firstElementChild as HTMLElement;
   }
 
   handlePageChange(newActivePage: number): void {
