@@ -6,7 +6,7 @@ import WinnersTable from '../components/winners-table';
 import { WinnerExtended } from '../types/winner';
 import Page from './page';
 
-const WINNERS_PER_PAGE = 7;
+const WINNERS_PER_PAGE = 10;
 
 type WinnerElements = {
   header: Header;

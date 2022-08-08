@@ -10,6 +10,7 @@ import Button from '../components/button';
 import getRandom from '../helpers';
 import Alert from '../components/alert';
 import Header from '../components/header';
+import { createWinner, getWinner, updateWinner } from '../api/winners';
 
 const CARS_PER_PAGE = 7;
 const RANDOM_CARS_COUNT = 100;
@@ -209,6 +210,15 @@ class GaragePage extends Page {
       const timeSec = new Date(time).getSeconds();
       title = 'Race completed with a win!';
       message = `${this.cars?.find((car) => car.id === id)?.name} won with ${timeSec}s time`;
+
+      try {
+        const winner = await getWinner(id);
+        const wins = winner.wins + 1;
+        const bestTime = Math.min(timeSec, winner.time);
+        await updateWinner(id, wins, bestTime);
+      } catch {
+        await createWinner(id, 1, timeSec);
+      }
     } else {
       title = 'Race completed with no winners';
       message = '';

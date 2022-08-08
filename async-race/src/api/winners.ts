@@ -51,13 +51,13 @@ const getWinner = async (id: number): Promise<Winner> => {
   throw new Error(`error: ${response.status}`);
 };
 
-const createWinner = async (name: string, color: string): Promise<Winner> => {
+const createWinner = async (id: number, wins: number, time: number): Promise<Winner> => {
   const url = getUrl();
 
   const headers = new Headers();
   headers.append('Content-Type', 'application/json');
 
-  const body = JSON.stringify({ name, color });
+  const body = JSON.stringify({ id, wins, time });
 
   const requestOptions = {
     method: 'POST',
@@ -88,13 +88,13 @@ const deleteWinner = async (id: number): Promise<void> => {
   }
 };
 
-const updateWinner = async (id: number, name: string, color: string): Promise<Winner> => {
+const updateWinner = async (id: number, wins: number, time: number): Promise<Winner> => {
   const url = getUrl(id);
 
   const headers = new Headers();
   headers.append('Content-Type', 'application/json');
 
-  const body = JSON.stringify({ name, color });
+  const body = JSON.stringify({ wins, time });
 
   const requestOptions = {
     method: 'PUT',
