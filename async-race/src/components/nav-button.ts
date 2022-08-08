@@ -24,7 +24,7 @@ class NavButton {
   create(): HTMLElement {
     this.container.classList.add('nav-link');
     this.container.textContent = this.text;
-    this.container.href = `/#${this.id}`;
+    this.container.href = `#${this.id}`;
     return this.container;
   }
 }
