@@ -60,7 +60,7 @@ class WinnersTable {
             colEl.textContent = winner.wins.toString();
             break;
           case TableCols.BestTime:
-            colEl.textContent = winner.time.toString();
+            colEl.textContent = winner.time.toFixed(2);
             break;
           default:
         }

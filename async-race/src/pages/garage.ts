@@ -211,9 +211,11 @@ class GaragePage extends Page {
     let message: string;
     if (raceResult.hasWinners) {
       const { id, time } = raceResult.winner;
-      const timeSec = new Date(time).getSeconds();
+      const timeSec = time / 1000;
       title = 'Race completed with a win!';
-      message = `${this.cars?.find((car) => car.id === id)?.name} won with ${timeSec}s time`;
+      message = `${this.cars?.find((car) => car.id === id)?.name} won with ${timeSec.toFixed(
+        2,
+      )}s time`;
 
       await GaragePage.updateWinners(id, timeSec);
     } else {
