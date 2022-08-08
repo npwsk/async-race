@@ -45,17 +45,13 @@ const stopCarEngine = async (id: number): Promise<Engine> => {
 const driveCar = async (id: number): Promise<void> => {
   const status = 'drive';
 
-  try {
-    const response = await changeEngineStatus(id, status);
+  const response = await changeEngineStatus(id, status);
 
-    if (response.ok) {
-      const data: { status: boolean } = await response.json();
-    } else {
-      const error = await response.text();
-      throw new Error(`error: ${error}`);
-    }
-  } catch (e) {
-    console.log(e);
+  if (response.ok) {
+    await response.json();
+  } else {
+    const error = await response.text();
+    throw new Error(`error: ${error}`);
   }
 };
 
