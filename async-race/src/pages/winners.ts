@@ -35,7 +35,11 @@ class WinnersPage extends Page {
     this.views = {
       header: new Header('Winners'),
       winnersTable: new WinnersTable(),
-      pagination: new Pagination(this.currentPage, this.totalPages, () => {}),
+      pagination: new Pagination(
+        this.currentPage,
+        this.totalPages,
+        this.handlePageChange.bind(this),
+      ),
     };
   }
 
@@ -63,7 +67,7 @@ class WinnersPage extends Page {
       this.views.header.render(this.currentPage, this.totalItems);
     }
     this.views.winnersTable.render(this.winners);
-    this.views.pagination.render(this.currentPage, this.totalItems);
+    this.views.pagination.render(this.currentPage, this.totalPages);
   }
 
   async render(container: HTMLElement): Promise<void> {
@@ -79,6 +83,11 @@ class WinnersPage extends Page {
 
     this.setPageAttribute(container);
     container.replaceChildren(wrapper);
+  }
+
+  handlePageChange(newActivePage: number): void {
+    this.currentPage = newActivePage;
+    this.update(true);
   }
 }
 

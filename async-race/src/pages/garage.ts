@@ -202,6 +202,10 @@ class GaragePage extends Page {
   }
 
   async handleRaceStart(): Promise<void> {
+    this.views.contols.startRace.disable();
+    this.views.contols.resetRace.disable();
+
+    this.views.carsList.resetRace();
     const raceResult = await this.views.carsList.startRace();
     let title: string;
     let message: string;
@@ -211,14 +215,7 @@ class GaragePage extends Page {
       title = 'Race completed with a win!';
       message = `${this.cars?.find((car) => car.id === id)?.name} won with ${timeSec}s time`;
 
-      try {
-        const winner = await getWinner(id);
-        const wins = winner.wins + 1;
-        const bestTime = Math.min(timeSec, winner.time);
-        await updateWinner(id, wins, bestTime);
-      } catch {
-        await createWinner(id, 1, timeSec);
-      }
+      await GaragePage.updateWinners(id, timeSec);
     } else {
       title = 'Race completed with no winners';
       message = '';
@@ -226,6 +223,9 @@ class GaragePage extends Page {
     this.views.alert.render(title, message);
     this.views.alert.show();
     setTimeout(() => this.views.alert.hide(), 5000);
+
+    this.views.contols.startRace.enable();
+    this.views.contols.resetRace.enable();
   }
 
   handleRaceReset(): void {
@@ -246,6 +246,17 @@ class GaragePage extends Page {
       .map((dec) => dec.toString(16).padStart(2, '0'))
       .join('');
     return { name, color: `#${color}` };
+  }
+
+  private static async updateWinners(id: number, time: number): Promise<void> {
+    try {
+      const winner = await getWinner(id);
+      const wins = winner.wins + 1;
+      const bestTime = Math.min(time, winner.time);
+      await updateWinner(id, wins, bestTime);
+    } catch {
+      await createWinner(id, 1, time);
+    }
   }
 }
 
