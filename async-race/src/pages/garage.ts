@@ -133,7 +133,7 @@ class GaragePage extends Page {
       this.views.header.render(this.currentPage, this.totalCarCount);
     }
     this.views.carsList.update(this.cars);
-    this.views.pagination.update(this.currentPage, this.totalPages);
+    this.views.pagination.render(this.currentPage, this.totalPages);
   }
 
   async render(container: HTMLElement): Promise<void> {
@@ -149,7 +149,7 @@ class GaragePage extends Page {
     controls.classList.add('container', 'vstack', 'gap-3');
     controls.append(createForm, updateForm, randomBtn, startRace, resetRace);
     const carsList = this.views.carsList.container;
-    const pagination = this.views.pagination.container;
+    const pagination = this.views.pagination.render(this.currentPage, this.totalCarCount);
 
     this.setPageAttribute(container);
     container.replaceChildren(header, controls, carsList, pagination, this.views.alert.render());

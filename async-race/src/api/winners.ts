@@ -1,4 +1,4 @@
-import Winner from '../types/winner';
+import { Winner } from '../types/winner';
 import API_URL from '../config';
 
 type SortParam = 'id' | 'wins' | 'time';
@@ -19,7 +19,9 @@ const getUrl = (id?: number): URL => {
   return url;
 };
 
-const getAllWinners = async (params: GetWinnersParams = {}): Promise<Winner[]> => {
+const getWinners = async (
+  params: GetWinnersParams = {},
+): Promise<{ winners: Winner[]; total: number }> => {
   const url = getUrl();
 
   Object.entries(params).forEach(([param, value]) => {
@@ -29,8 +31,10 @@ const getAllWinners = async (params: GetWinnersParams = {}): Promise<Winner[]> =
   const response = await fetch(url);
 
   if (response.ok) {
-    const data: Winner[] = await response.json();
-    return data;
+    const winners: Winner[] = await response.json();
+    const totalCount = response.headers.get('X-Total-Count');
+    const total = totalCount === null ? winners.length : Number(totalCount);
+    return { winners, total };
   }
   throw new Error(`error: ${response.status}`);
 };
@@ -108,5 +112,5 @@ const updateWinner = async (id: number, name: string, color: string): Promise<Wi
 };
 
 export {
-  getAllWinners, getWinner, createWinner, deleteWinner, updateWinner,
+  getWinners, getWinner, createWinner, deleteWinner, updateWinner,
 };

@@ -5,13 +5,13 @@ type PageChangeCallback = (newActivePage: number) => void;
 type BtnOptions = { active?: boolean; disabled?: boolean };
 
 class Pagination {
-  container: HTMLElement;
+  private container: HTMLElement;
 
-  activePage: number;
+  private activePage: number;
 
-  totalPages: number;
+  private totalPages: number;
 
-  onPageChange: PageChangeCallback;
+  private onPageChange: PageChangeCallback;
 
   constructor(activePage: number, totalPages: number, onPageChange: PageChangeCallback) {
     this.container = document.createElement('nav');
@@ -45,7 +45,7 @@ class Pagination {
     window.scrollTo(0, 0);
   }
 
-  update(current: number, total: number): void {
+  render(current: number, total: number): HTMLElement {
     this.activePage = current;
     this.totalPages = total;
     let pagesNums = Array(total > 3 ? 3 : total)
@@ -66,6 +66,7 @@ class Pagination {
     ulEl.append(prevBtn, ...pageBtns, nextBtn);
 
     this.container.replaceChildren(ulEl);
+    return this.container;
   }
 
   static getButton(page: string | number, opts: BtnOptions = {}): HTMLLIElement {

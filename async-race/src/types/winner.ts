@@ -1,7 +1,11 @@
+import Car from './car';
+
 interface Winner {
   id: number;
   wins: number;
   time: number;
 }
 
-export default Winner;
+interface WinnerExtended extends Winner, Car {}
+
+export { Winner, WinnerExtended };
