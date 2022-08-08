@@ -11,7 +11,6 @@ const changeEngineStatus = async (id: number, status: string): Promise<Response>
   const requestOptions = {
     method: 'PATCH',
   };
-
   const response = await fetch(url, requestOptions);
 
   return response;
@@ -45,13 +44,18 @@ const stopCarEngine = async (id: number): Promise<Engine> => {
 
 const driveCar = async (id: number): Promise<void> => {
   const status = 'drive';
-  const response = await changeEngineStatus(id, status);
 
-  if (response.ok) {
-    const data: { status: boolean } = await response.json();
-  } else {
-    const error = await response.text();
-    throw new Error(`error: ${error}`);
+  try {
+    const response = await changeEngineStatus(id, status);
+
+    if (response.ok) {
+      const data: { status: boolean } = await response.json();
+    } else {
+      const error = await response.text();
+      throw new Error(`error: ${error}`);
+    }
+  } catch (e) {
+    console.log(e);
   }
 };
 

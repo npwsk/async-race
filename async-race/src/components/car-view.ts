@@ -115,7 +115,7 @@ class CarView {
   private async handleStart(): Promise<void> {
     const animationTime = await this.startEngine();
 
-    this.carTrack.resetSvgPosition();
+    // this.carTrack.resetSvgPosition();
 
     try {
       await this.driveCar(animationTime);
@@ -125,6 +125,9 @@ class CarView {
   }
 
   private async handleStop(): Promise<void> {
+    if (this.state === CarState.Stopped) {
+      this.carTrack.resetSvgPosition();
+    }
     if (this.state === CarState.Driving) {
       this.state = CarState.Stopping;
       this.setButtonsState(this.state);
@@ -179,7 +182,7 @@ class CarView {
   private setButtonsState(state: CarState): void {
     switch (state) {
       case CarState.Stopped:
-        this.controls.stop.disable();
+        this.controls.stop.enable();
         this.controls.start.enable();
         this.controls.select.enable();
         this.controls.delete.enable();

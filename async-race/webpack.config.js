@@ -60,6 +60,7 @@ const config = {
   devServer: {
     hot: true,
   },
+  devtool: isProduction? 'source-map' : 'inline-cheap-source-map',
 };
 
 module.exports = config;
