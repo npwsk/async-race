@@ -13,10 +13,10 @@ class Pagination {
 
   private onPageChange: PageChangeCallback;
 
-  constructor(activePage: number, totalPages: number, onPageChange: PageChangeCallback) {
+  constructor(onPageChange: PageChangeCallback) {
     this.container = document.createElement('nav');
-    this.activePage = activePage;
-    this.totalPages = totalPages;
+    this.activePage = 1;
+    this.totalPages = 1;
     this.onPageChange = onPageChange;
     this.container.addEventListener('click', this.handleClick.bind(this));
   }

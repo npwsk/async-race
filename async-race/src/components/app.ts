@@ -1,5 +1,5 @@
 import PageIds from '../constants/pages';
-import Page from '../pages/page';
+import Page from '../base/page';
 import Garage from '../pages/garage';
 import Winners from '../pages/winners';
 import NotFound from '../pages/not-found';
@@ -8,7 +8,7 @@ import Nav from './nav';
 class App {
   elements: {
     root: HTMLElement | null;
-    currentPage: HTMLElement;
+    pageContainer: HTMLElement;
   };
 
   nav: Nav;
@@ -17,30 +17,37 @@ class App {
 
   winnersView: Winners;
 
+  activePage: string;
+
   constructor() {
     const root = document.getElementById('root');
-    const currentPage = document.createElement('div');
+    const pageContainer = document.createElement('div');
 
-    this.elements = { root, currentPage };
+    this.elements = { root, pageContainer };
     this.nav = new Nav(PageIds.Garage);
     this.garageView = new Garage(PageIds.Garage);
     this.winnersView = new Winners(PageIds.Winners);
+    this.activePage = PageIds.Garage;
   }
 
-  renderPage(): void {
+  async renderPage(): Promise<void> {
     const hash = window.location.hash.slice(1);
 
-    if (this.elements.currentPage.dataset.page === hash) return;
+    if (this.activePage === hash) return;
+
+    this.activePage = hash;
 
     let targetPage: Page;
 
     switch (hash) {
       case '':
       case PageIds.Garage:
+        await this.garageView.fetch();
         targetPage = this.garageView;
         this.nav.changeActive(PageIds.Garage);
         break;
       case PageIds.Winners:
+        await this.winnersView.fetch();
         targetPage = this.winnersView;
         this.nav.changeActive(PageIds.Winners);
         break;
@@ -48,7 +55,7 @@ class App {
         targetPage = new NotFound();
     }
 
-    targetPage.render(this.elements.currentPage);
+    this.elements.pageContainer.replaceChildren(targetPage.render());
   }
 
   init(): void {
@@ -56,7 +63,7 @@ class App {
       return;
     }
     this.elements.root.append(this.nav.create());
-    this.elements.root.append(this.elements.currentPage);
+    this.elements.root.append(this.elements.pageContainer);
 
     this.renderPage();
 

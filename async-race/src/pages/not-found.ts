@@ -1,4 +1,4 @@
-import Page from './page';
+import Page from '../base/page';
 
 class NotFound extends Page {
   constructor() {

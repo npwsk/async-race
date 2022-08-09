@@ -3,13 +3,11 @@ import {
 } from '../api/garage';
 import Form from '../components/form';
 import Car from '../types/car';
-import Page from './page';
+import Page from '../base/page';
 import CarsList from '../components/cars-list';
-import Pagination from '../components/pagination';
 import Button from '../components/button';
 import getRandom from '../helpers';
 import Alert from '../components/alert';
-import Header from '../components/header';
 import {
   createWinner, deleteWinner, getWinner, updateWinner,
 } from '../api/winners';
@@ -51,126 +49,95 @@ type GarageControls = {
   resetRace: Button;
 };
 
-type GarageElems = {
-  header: Header;
-  contols: GarageControls;
-  carsList: CarsList;
-  pagination: Pagination;
-  alert: Alert;
-};
-
 class GaragePage extends Page {
-  cars: Car[] | null;
+  private cars: Car[];
 
-  totalCarCount: number;
+  private selectedCarId: number | null;
 
-  currentPage: number;
+  private contols: GarageControls;
 
-  totalPages: number;
+  private carsList: CarsList;
 
-  selectedCarId: number | null;
-
-  views: GarageElems;
+  private alert: Alert;
 
   constructor(id: string) {
     super(id, 'Garage');
-    this.cars = null;
-    this.currentPage = 1;
-    this.totalPages = 1;
-    this.totalCarCount = 0;
+    this.cars = [];
     this.selectedCarId = null;
-    this.views = {
-      contols: {
-        create: new Form('Create', this.handleCarCreate.bind(this)),
-        update: new Form('Update', this.handleCarUpdate.bind(this)),
-        random: new Button(
-          {
-            label: `Generate ${RANDOM_CARS_COUNT} random cars:`,
-            text: 'Generate',
-            onClick: this.handleRandomBtn.bind(this),
-          },
-          ['btn-primary'],
-        ),
-        startRace: new Button(
-          {
-            label: 'Start race:',
-            text: 'Race',
-            onClick: this.handleRaceStart.bind(this),
-          },
-          ['btn-primary'],
-        ),
-        resetRace: new Button(
-          {
-            label: 'Reset all cars:',
-            text: 'Reset',
-            onClick: this.handleRaceReset.bind(this),
-          },
-          ['btn-primary'],
-        ),
-      },
-      carsList: new CarsList({
-        cars: this.cars,
-        onDelete: this.handleCarDelete.bind(this),
-        onSelect: this.handleCarSelect.bind(this),
-      }),
-      pagination: new Pagination(
-        this.currentPage,
-        this.totalPages,
-        this.handlePageChange.bind(this),
+    this.contols = {
+      create: new Form('Create', this.handleCarCreate.bind(this)),
+      update: new Form('Update', this.handleCarUpdate.bind(this)),
+      random: new Button(
+        {
+          label: `Generate ${RANDOM_CARS_COUNT} random cars:`,
+          text: 'Generate',
+          onClick: this.handleRandomBtn.bind(this),
+        },
+        ['btn-primary'],
       ),
-      header: new Header('Garage'),
-      alert: new Alert(),
+      startRace: new Button(
+        {
+          label: 'Start race:',
+          text: 'Race',
+          onClick: this.handleRaceStart.bind(this),
+        },
+        ['btn-primary'],
+      ),
+      resetRace: new Button(
+        {
+          label: 'Reset all cars:',
+          text: 'Reset',
+          onClick: this.handleRaceReset.bind(this),
+        },
+        ['btn-primary'],
+      ),
     };
+    this.carsList = new CarsList({
+      cars: this.cars,
+      onDelete: this.handleCarDelete.bind(this),
+      onSelect: this.handleCarSelect.bind(this),
+    });
+    this.alert = new Alert();
   }
 
-  private async fetchCars(): Promise<{ cars: Car[]; total: number }> {
-    return getCars({ limit: CARS_PER_PAGE, page: this.currentPage });
+  async fetch(): Promise<void> {
+    const { cars, total } = await getCars({ limit: CARS_PER_PAGE, page: this.state.currentPage });
+    this.cars = cars;
+    this.state.totalItems = total;
+    this.state.totalPages = Math.ceil(total / CARS_PER_PAGE);
   }
 
-  async update(shouldFetch = false): Promise<void> {
-    if (shouldFetch || this.cars === null) {
-      const { cars, total } = await this.fetchCars();
-      this.cars = cars;
-      this.totalCarCount = total;
-      this.totalPages = Math.ceil(total / CARS_PER_PAGE);
-      this.views.header.render(this.currentPage, this.totalCarCount);
-    }
-    this.views.contols.startRace.render();
-    this.views.contols.resetRace.render();
+  render(): typeof this.container {
+    super.render();
 
-    this.views.carsList.update(this.cars);
-    this.views.pagination.render(this.currentPage, this.totalPages);
-    this.selectCar();
-  }
-
-  async render(container: HTMLElement): Promise<void> {
-    await this.update();
-
-    const header = this.views.header.render(this.currentPage, this.totalCarCount);
-    const randomBtn = this.views.contols.random.render();
-    const startRace = this.views.contols.startRace.render();
-    const resetRace = this.views.contols.resetRace.render();
-    const createForm = this.views.contols.create.container;
-    const updateForm = this.views.contols.update.container;
+    const randomBtn = this.contols.random.render();
+    const startRace = this.contols.startRace.render();
+    const resetRace = this.contols.resetRace.render();
+    const createForm = this.contols.create.container;
+    const updateForm = this.contols.update.container;
     const controls = document.createElement('div');
     controls.classList.add('container', 'vstack', 'gap-3');
     controls.append(createForm, updateForm, randomBtn, startRace, resetRace);
-    const carsList = this.views.carsList.container;
-    const pagination = this.views.pagination.render(this.currentPage, this.totalCarCount);
+    const carsList = this.carsList.container;
+    const pagination = this.pagination.render(this.state.currentPage, this.state.totalPages);
+
+    this.header.render(this.state.currentPage, this.state.totalItems);
+    this.contols.startRace.render();
+    this.contols.resetRace.render();
+
+    this.carsList.update(this.cars);
+    this.pagination.render(this.state.currentPage, this.state.totalPages);
+    this.selectCar();
 
     this.selectCar();
-    this.setPageAttribute(container);
-    container.replaceChildren(header, controls, carsList, pagination, this.views.alert.render());
-  }
-
-  handlePageChange(newActivePage: number): void {
-    this.currentPage = newActivePage;
-    this.update(true);
+    this.container.append(controls, carsList, pagination, this.alert.render());
+    return this.container;
   }
 
   async handleCarCreate({ name, color }: Omit<Car, 'id'>): Promise<void> {
     await createCar(name, color);
-    await this.update(true);
+    await this.fetch();
+    this.render();
   }
 
   async handleCarUpdate({ name, color }: Omit<Car, 'id'>): Promise<void> {
@@ -178,15 +145,17 @@ class GaragePage extends Page {
       return;
     }
     await updateCar(this.selectedCarId, name, color);
-    await this.update(true);
+    await this.fetch();
+    this.render();
   }
 
   async handleCarDelete(deletedId: number): Promise<void> {
     await deleteCar(deletedId);
     await deleteWinner(deletedId).catch(() => {});
-    await this.update(true);
-    if (this.cars?.length === 0 && this.currentPage > 1) {
-      this.handlePageChange(this.currentPage - 1);
+    await this.fetch();
+    this.render();
+    if (this.cars?.length === 0 && this.state.currentPage > 1) {
+      this.handlePageChange(this.state.currentPage - 1);
     }
   }
 
@@ -198,29 +167,30 @@ class GaragePage extends Page {
   private selectCar(): void {
     const selectedCar = this.cars?.find((car) => car.id === this.selectedCarId);
 
-    this.views.carsList.setSelected(this.selectedCarId);
+    this.carsList.setSelected(this.selectedCarId);
     if (selectedCar) {
       const { name, color } = selectedCar;
-      this.views.contols.update.updateValues({ name, color });
-      this.views.contols.update.enable();
+      this.contols.update.updateValues({ name, color });
+      this.contols.update.enable();
     } else {
-      this.views.contols.update.reset();
-      this.views.contols.update.disable();
+      this.contols.update.reset();
+      this.contols.update.disable();
     }
   }
 
   async handleRandomBtn(): Promise<void> {
     const cars = this.generateRandomCars(RANDOM_CARS_COUNT);
     await Promise.allSettled(cars.map((car) => createCar(car.name, car.color)));
-    await this.update(true);
+    await this.fetch();
+    this.render();
   }
 
   async handleRaceStart(): Promise<void> {
-    this.views.contols.startRace.disable();
-    this.views.contols.resetRace.disable();
+    this.contols.startRace.disable();
+    this.contols.resetRace.disable();
 
-    this.views.carsList.resetRace();
-    const raceResult = await this.views.carsList.startRace();
+    this.carsList.resetRace();
+    const raceResult = await this.carsList.startRace();
     let title: string;
     let message: string;
     if (raceResult.hasWinners) {
@@ -236,16 +206,16 @@ class GaragePage extends Page {
       title = 'Race completed with no winners';
       message = '';
     }
-    this.views.alert.render(title, message);
-    this.views.alert.show();
-    setTimeout(() => this.views.alert.hide(), 5000);
+    this.alert.render(title, message);
+    this.alert.show();
+    setTimeout(() => this.alert.hide(), 5000);
 
-    this.views.contols.startRace.enable();
-    this.views.contols.resetRace.enable();
+    this.contols.startRace.enable();
+    this.contols.resetRace.enable();
   }
 
   handleRaceReset(): void {
-    this.views.carsList.resetRace();
+    this.carsList.resetRace();
   }
 
   generateRandomCars(count: number): NewCar[] {
