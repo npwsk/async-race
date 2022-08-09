@@ -36,6 +36,8 @@ class CarView {
 
   private onSelect: Callback<void>;
 
+  private isSelected: boolean;
+
   private state: CarState;
 
   constructor({ car, onDelete, onSelect }: CarViewProps) {
@@ -64,6 +66,7 @@ class CarView {
     };
     this.onDelete = onDelete;
     this.onSelect = onSelect;
+    this.isSelected = false;
     this.state = CarState.Ready;
     this.disableButtons();
   }
@@ -81,8 +84,29 @@ class CarView {
     headerBtnBox.append(selectBtn, deleteBtn);
 
     const header = document.createElement('div');
-    header.classList.add('d-flex', 'flex-wrap', 'gap-2', 'py-2', 'border-bottom');
+    header.classList.add(
+      'd-flex',
+      'flex-wrap',
+      'gap-2',
+      'py-2',
+      'border-bottom',
+      'position-relative',
+    );
     header.append(title, headerBtnBox);
+
+    if (this.isSelected) {
+      const badge = document.createElement('span');
+      badge.classList.add(
+        'badge',
+        'text-bg-warning',
+        'position-absolute',
+        'top-0',
+        'start-0',
+        'translate-middle',
+      );
+      badge.textContent = 'selected';
+      header.append(badge);
+    }
 
     const startBtn = this.controls.start.render();
     const stopBtn = this.controls.stop.render();
@@ -92,17 +116,14 @@ class CarView {
     engineBtnGroup.append(startBtn, stopBtn);
 
     this.container.classList.add('border-bottom', 'p-4', 'vstack', 'gap-3');
-    this.container.append(header, this.carTrack.render(), engineBtnGroup);
+    this.container.replaceChildren(header, this.carTrack.render(), engineBtnGroup);
 
     return this.container;
   }
 
   setSelected(isSelected: boolean): void {
-    if (isSelected) {
-      this.container.classList.add('bg-primary');
-    } else {
-      this.container.classList.remove('bg-primary');
-    }
+    this.isSelected = isSelected;
+    this.render();
   }
 
   private async handleDelete(): Promise<void> {
