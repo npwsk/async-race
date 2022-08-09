@@ -70,18 +70,18 @@ class CarView {
 
   render(): HTMLElement {
     const title = document.createElement('h2');
-    title.classList.add('h3', 'me-auto');
+    title.classList.add('h3');
     title.textContent = this.name;
 
     const selectBtn = this.controls.select.render();
     const deleteBtn = this.controls.delete.render();
 
     const headerBtnBox = document.createElement('div');
-    headerBtnBox.classList.add('hstack', 'gap-3');
+    headerBtnBox.classList.add('hstack', 'gap-2');
     headerBtnBox.append(selectBtn, deleteBtn);
 
     const header = document.createElement('div');
-    header.classList.add('hstack', 'gap-3', 'py-2', 'border-bottom');
+    header.classList.add('d-flex', 'flex-wrap', 'gap-2', 'py-2', 'border-bottom');
     header.append(title, headerBtnBox);
 
     const startBtn = this.controls.start.render();
@@ -91,7 +91,7 @@ class CarView {
     engineBtnGroup.classList.add('btn-group', 'me-auto');
     engineBtnGroup.append(startBtn, stopBtn);
 
-    this.container.classList.add('car', 'border-bottom', 'p-4', 'vstack', 'gap-3');
+    this.container.classList.add('border-bottom', 'p-4', 'vstack', 'gap-3');
     this.container.append(header, this.carTrack.render(), engineBtnGroup);
 
     return this.container;

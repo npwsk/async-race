@@ -27,7 +27,7 @@ class Form<CallbackParams> {
     this.action = actionText;
     this.onSubmit = onSubmit;
     this.container = document.createElement('form');
-    this.container.classList.add('p-3', 'hstack', 'gap-3');
+    this.container.classList.add('d-flex', 'flex-wrap', 'flex-md-nowrap', 'gap-3');
     this.inputFields = {
       name: Form.createInputField({
         type: 'text',

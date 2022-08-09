@@ -18,12 +18,25 @@ class Header {
     const heading = document.createElement('h1');
     heading.textContent = this.title;
 
-    const counter = document.createElement('div');
-    counter.innerHTML = `<strong>Current page:</strong> ${currentPage}
-    <strong>Total items:</strong> ${totalItems}`;
-    this.container.replaceChildren(heading, counter);
+    const counters = document.createElement('div');
+    counters.classList.add('d-flex', 'flex-column', 'gap-2');
 
-    this.container.classList.add('container', 'hstack', 'justify-content-between');
+    const pageCounter = document.createElement('div');
+    pageCounter.innerHTML = `<strong>Current page:</strong> ${currentPage}`;
+    const itemsCounter = document.createElement('div');
+    itemsCounter.innerHTML = `<strong>Total items:</strong> ${totalItems}`;
+    counters.append(pageCounter, itemsCounter);
+
+    this.container.replaceChildren(heading, counters);
+
+    this.container.classList.add(
+      'container',
+      'py-3',
+      'd-flex',
+      'flex-wrap',
+      'justify-content-between',
+      'align-items-center',
+    );
     return this.container;
   }
 }
