@@ -2,7 +2,7 @@ import { getCar } from '../api/garage';
 import { getWinners } from '../api/winners';
 import Header from '../components/header';
 import Pagination from '../components/pagination';
-import WinnersTable from '../components/winners-table';
+import WinnersTable, { SortOrder, SortKey, Sort } from '../components/winners-table';
 import { WinnerExtended } from '../types/winner';
 import Page from './page';
 
@@ -23,7 +23,9 @@ class WinnersPage extends Page {
 
   private totalItems: number;
 
-  views: WinnerElements;
+  private sort: Sort;
+
+  private views: WinnerElements;
 
   constructor(id: string) {
     super(id, 'Winners');
@@ -32,9 +34,10 @@ class WinnersPage extends Page {
     this.currentPage = 1;
     this.totalPages = 1;
     this.totalItems = 1;
+    this.sort = { key: null, order: null };
     this.views = {
       header: new Header('Winners'),
-      winnersTable: new WinnersTable(),
+      winnersTable: new WinnersTable(this.handleSort.bind(this)),
       pagination: new Pagination(
         this.currentPage,
         this.totalPages,
@@ -44,10 +47,15 @@ class WinnersPage extends Page {
   }
 
   private async fetchWinners(): Promise<{ winners: WinnerExtended[]; total: number }> {
-    const { winners, total } = await getWinners({
+    let params: Parameters<typeof getWinners>[0] = {
       limit: WINNERS_PER_PAGE,
       page: this.currentPage,
-    });
+    };
+    if (this.sort.key) {
+      const { key, order } = this.sort;
+      params = { ...params, sort: key, order };
+    }
+    const { winners, total } = await getWinners(params);
     const winnerCars = await Promise.all(winners.map((winner) => getCar(winner.id)));
     const extendedWinners = winners.map((winner) => {
       const winnerCar = winnerCars.find((car) => car.id === winner.id);
@@ -85,9 +93,15 @@ class WinnersPage extends Page {
     container.replaceChildren(wrapper);
   }
 
-  handlePageChange(newActivePage: number): void {
+  private handlePageChange(newActivePage: number): void {
     this.currentPage = newActivePage;
     this.update(true);
+  }
+
+  private async handleSort(key: SortKey, order: SortOrder): Promise<void> {
+    this.sort.key = key;
+    this.sort.order = order;
+    await this.update(true);
   }
 }
 
