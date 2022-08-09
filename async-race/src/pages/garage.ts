@@ -135,8 +135,12 @@ class GaragePage extends Page {
       this.totalPages = Math.ceil(total / CARS_PER_PAGE);
       this.views.header.render(this.currentPage, this.totalCarCount);
     }
+    this.views.contols.startRace.render();
+    this.views.contols.resetRace.render();
+
     this.views.carsList.update(this.cars);
     this.views.pagination.render(this.currentPage, this.totalPages);
+    this.selectCar();
   }
 
   async render(container: HTMLElement): Promise<void> {
@@ -154,6 +158,7 @@ class GaragePage extends Page {
     const carsList = this.views.carsList.container;
     const pagination = this.views.pagination.render(this.currentPage, this.totalCarCount);
 
+    this.selectCar();
     this.setPageAttribute(container);
     container.replaceChildren(header, controls, carsList, pagination, this.views.alert.render());
   }
@@ -187,14 +192,20 @@ class GaragePage extends Page {
 
   handleCarSelect(id: number): void {
     this.selectedCarId = this.selectedCarId !== id ? id : null;
+    this.selectCar();
+  }
+
+  private selectCar(): void {
     const selectedCar = this.cars?.find((car) => car.id === this.selectedCarId);
 
     this.views.carsList.setSelected(this.selectedCarId);
     if (selectedCar) {
       const { name, color } = selectedCar;
       this.views.contols.update.updateValues({ name, color });
+      this.views.contols.update.enable();
     } else {
       this.views.contols.update.reset();
+      this.views.contols.update.disable();
     }
   }
 

@@ -86,6 +86,14 @@ class Form<CallbackParams> {
   reset(): void {
     this.updateValues({ name: '', color: DEFAULT_COLOR });
   }
+
+  disable(): void {
+    this.submitBtn.disabled = true;
+  }
+
+  enable(): void {
+    this.submitBtn.disabled = false;
+  }
 }
 
 export default Form;

@@ -48,8 +48,11 @@ class Button {
     await this.onClick();
   }
 
-  render(): HTMLDivElement {
+  render(text?: string): HTMLDivElement {
     const { label, button } = this.elements;
+    if (text) {
+      button.textContent = text;
+    }
     this.container.classList.add('hstack', 'gap-3');
     this.container.replaceChildren(label, button);
     return this.container;

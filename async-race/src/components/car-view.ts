@@ -76,7 +76,7 @@ class CarView {
     title.classList.add('h3');
     title.textContent = this.name;
 
-    const selectBtn = this.controls.select.render();
+    const selectBtn = this.controls.select.render(this.isSelected ? 'Unselect' : 'Select');
     const deleteBtn = this.controls.delete.render();
 
     const headerBtnBox = document.createElement('div');
