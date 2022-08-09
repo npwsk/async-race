@@ -24,25 +24,31 @@ class Pagination {
   handleClick(e: Event): void {
     e.preventDefault();
     const target = e.target as HTMLElement;
+    let pageChanged = false;
     switch (target.dataset.page) {
       case undefined:
         break;
       case PREV_PAGE:
         if (this.activePage > 1) {
           this.activePage -= 1;
+          pageChanged = true;
         }
         break;
       case NEXT_PAGE:
         if (this.activePage < this.totalPages) {
           this.activePage += 1;
+          pageChanged = true;
         }
         break;
       default:
+        pageChanged = Number(target.dataset.page) !== this.activePage;
         this.activePage = Number(target.dataset.page);
         break;
     }
     this.onPageChange(this.activePage);
-    window.scrollTo(0, 0);
+    if (pageChanged) {
+      window.scrollTo(0, 0);
+    }
   }
 
   render(current: number, total: number): HTMLElement {
@@ -85,10 +91,10 @@ class Pagination {
 
     switch (page) {
       case PREV_PAGE:
-        linkEl.textContent = '«';
+        linkEl.textContent = '<';
         break;
       case NEXT_PAGE:
-        linkEl.textContent = '»';
+        linkEl.textContent = '>';
         break;
       default:
         linkEl.textContent = page.toString();
