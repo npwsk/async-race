@@ -3,10 +3,9 @@ import { getWinners } from '../api/winners';
 import Header from '../components/header';
 import Pagination from '../components/pagination';
 import WinnersTable, { SortOrder, SortKey, Sort } from '../components/winners-table';
+import { WINNERS_PER_PAGE } from '../constants';
 import { WinnerExtended } from '../types/winner';
 import Page from './page';
-
-const WINNERS_PER_PAGE = 10;
 
 type WinnerElements = {
   header: Header;
@@ -74,7 +73,7 @@ class WinnersPage extends Page {
       this.totalPages = Math.ceil(total / WINNERS_PER_PAGE);
       this.views.header.render(this.currentPage, this.totalItems);
     }
-    this.views.winnersTable.render(this.winners);
+    this.views.winnersTable.render(this.winners, this.currentPage);
     this.views.pagination.render(this.currentPage, this.totalPages);
   }
 
@@ -84,7 +83,7 @@ class WinnersPage extends Page {
     wrapper.classList.add('container');
 
     const header = this.views.header.render(this.currentPage, this.totalItems);
-    const table = this.views.winnersTable.render(this.winners);
+    const table = this.views.winnersTable.render(this.winners, this.currentPage);
     const pagination = this.views.pagination.render(this.currentPage, this.totalItems);
 
     wrapper.append(header, table, pagination);

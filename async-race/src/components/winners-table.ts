@@ -1,5 +1,6 @@
 import { WinnerExtended } from '../types/winner';
 import CarIcon from './car-icon';
+import { WINNERS_PER_PAGE } from '../constants';
 
 enum TableCols {
   Number,
@@ -70,7 +71,7 @@ class WinnersTable {
     this.headRow.addEventListener('click', this);
   }
 
-  render(winners: WinnerExtended[]): HTMLTableElement {
+  render(winners: WinnerExtended[], currentPage: number): HTMLTableElement {
     const head = document.createElement('thead');
     head.classList.add('table-light');
 
@@ -100,7 +101,7 @@ class WinnersTable {
 
         switch (col) {
           case TableCols.Number:
-            colEl.textContent = (index + 1).toString();
+            colEl.textContent = ((currentPage - 1) * WINNERS_PER_PAGE + index + 1).toString();
             break;
           case TableCols.Color: {
             const svg = new CarIcon(winner.color).render();
